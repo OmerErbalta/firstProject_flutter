@@ -1,6 +1,3 @@
-// To parse this JSON data, do
-//
-//     final musteri = musteriFromMap(jsonString);
 
 import 'package:hive_flutter/adapters.dart';
 part 'Musteri.g.dart';
@@ -29,7 +26,7 @@ class Musteri {
   final DateTime dogumTarihi;
   @HiveField(8)
   final String kontratSuresi;
-  late int sira;
+  late int sira=0;
 
   Musteri(
       this.isim,

@@ -1,25 +1,24 @@
-// ignore_for_file: prefer_const_constructors, unnecessary_new, prefer_interpolation_to_compose_strings
-import 'dart:math';
+// ignore_for_file: prefer_const_constructors, unnecessary_new, prefer_interpolation_to_compose_strings, no_leading_underscores_for_local_identifiers, prefer_const_literals_to_create_immutables
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:line_icons/line_icons.dart';
-import 'package:list_gayrimenkul/MusteriGuncelle.dart';
-import 'dart:math' as math;
-import 'package:list_gayrimenkul/model/Musteri.dart';
 import 'package:date_format/date_format.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:list_gayrimenkul/model/sabitler.dart';
 import 'package:flutter_cupertino_date_picker_fork/flutter_cupertino_date_picker_fork.dart';
-import 'dart:async';
-import 'model/seachBar.dart';
+import 'package:list_gayrimenkul/api/notification_api.dart';
+import 'package:list_gayrimenkul/model/bildirim.dart';
+import 'bildirimSayfası.dart';
+import 'model/Musteri.dart';
+import 'model/sabitler.dart';
 import 'musteriDetay.dart';
-import 'package:anim_search_bar/anim_search_bar.dart';
 
 late List<Musteri> MusteriListesi = [];
+late List<Bildirim> bildirimListesi = [];
 
 class AnaSayfa extends StatefulWidget {
   const AnaSayfa({Key? key}) : super(key: key);
@@ -27,8 +26,6 @@ class AnaSayfa extends StatefulWidget {
   @override
   State<AnaSayfa> createState() => AnaSayfaState();
 }
-
-enum SingingCharacter { Erkek, Kadin }
 
 List<Musteri> tumMusteriler = [];
 
@@ -45,7 +42,7 @@ class AnaSayfaState extends State<AnaSayfa> {
     }
   }
 
-  SingingCharacter? cinsiyet = SingingCharacter.Erkek;
+  String cinsiyetValue = "Erkek";
   var box = Hive.box<Musteri>("Musteriler");
   late DateTime kontratBaslangicTarihi;
   late DateTime dogumTarihiDatetime = DateTime.now();
@@ -65,6 +62,7 @@ class AnaSayfaState extends State<AnaSayfa> {
       await musterileriOku();
       setState(() {});
     }();
+    bildirimler();
     super.initState();
   }
 
@@ -86,7 +84,12 @@ class AnaSayfaState extends State<AnaSayfa> {
       Scaffold(
         appBar: AppBar(
           leading: ElevatedButton(
-            onPressed: () {},
+            onPressed: ()async {
+              await NotificationApi.showSchedulNotification(
+                  title: "basardın",
+                  body: "Helal lan sana",
+                  scheduledDate: DateTime.now().add(Duration(seconds: 10)));
+            },
             style: ElevatedButton.styleFrom(
                 shadowColor: Colors.transparent,
                 primary: Colors.transparent,
@@ -117,7 +120,14 @@ class AnaSayfaState extends State<AnaSayfa> {
                         shadowColor: Colors.transparent,
                         primary: Colors.transparent,
                         onPrimary: Sabitler.anaRenk),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BildirimSayfasi(
+                                    bildirimListesi: bildirimListesi,
+                                  )));
+                    },
                     child: Icon(
                       Icons.notifications,
                       size: 35,
@@ -212,7 +222,7 @@ class AnaSayfaState extends State<AnaSayfa> {
             itemBuilder: ((context, index) {
               MusteriListesi[index].sira = index;
               Musteri oAnkiMusteri = MusteriListesi[index];
-
+              print(index);
               return Slidable(
                 closeOnScroll: true,
                 startActionPane: ActionPane(motion: DrawerMotion(), children: [
@@ -288,7 +298,7 @@ class AnaSayfaState extends State<AnaSayfa> {
                         title: Text(
                           oAnkiMusteri.isim +
                               " " +
-                              oAnkiMusteri.soyisim.toString(),
+                              oAnkiMusteri.sira.toString(),
                           style: TextStyle(
                             color: Color.fromRGBO(39, 105, 171, 1),
                             fontFamily: 'Nunito',
@@ -391,11 +401,11 @@ class AnaSayfaState extends State<AnaSayfa> {
                 children: [
                   Radio(
                       activeColor: Colors.white,
-                      value: SingingCharacter.Erkek,
-                      groupValue: cinsiyet,
-                      onChanged: (SingingCharacter? index) {
+                      value: "Erkek",
+                      groupValue: cinsiyetValue,
+                      onChanged: (String? index) {
                         setState(() {
-                          cinsiyet = index;
+                          cinsiyetValue = index!;
                         });
                       }),
                   Expanded(
@@ -415,11 +425,11 @@ class AnaSayfaState extends State<AnaSayfa> {
                 children: [
                   Radio(
                       activeColor: Colors.white,
-                      value: SingingCharacter.Kadin,
-                      groupValue: cinsiyet,
-                      onChanged: (SingingCharacter? index) {
+                      value: "Kadın",
+                      groupValue: cinsiyetValue,
+                      onChanged: (String? index) {
                         setState(() {
-                          cinsiyet = index;
+                          cinsiyetValue = index!;
                         });
                       }),
                   Expanded(
@@ -531,7 +541,7 @@ class AnaSayfaState extends State<AnaSayfa> {
         soyisim.text,
         adres.text,
         telefon.text.toString(),
-        cinsiyet.toString(),
+        cinsiyetValue,
         kontratBaslangicTarihi,
         kontatBitisTarihi,
         dogumTarihiDatetime,
@@ -572,6 +582,28 @@ class AnaSayfaState extends State<AnaSayfa> {
       musterileriListele();
     });
   }
+
+  void bildirimler() {
+    for (int i = 0; i < MusteriListesi.length; i++) {
+      Musteri oankiMusteri = MusteriListesi[i];
+      DateTime dogumTarihi = oankiMusteri.dogumTarihi;
+      int kontratBitis =
+          oankiMusteri.kontratBitisTarihi.difference(DateTime.now()).inDays;
+      if (dogumTarihi.difference(DateTime.now()).inDays < 0) {
+        dogumTarihi = DateTime(DateTime.now().year,
+            oankiMusteri.dogumTarihi.month, oankiMusteri.dogumTarihi.day);
+      }
+      if (dogumTarihi.difference(DateTime.now()).inDays < 0) {
+        dogumTarihi = DateTime(DateTime.now().year + 1,
+            oankiMusteri.dogumTarihi.month, oankiMusteri.dogumTarihi.day);
+      }
+      bildirimListesi.add(Bildirim(
+          oankiMusteri.sira,
+          kontratBitis,
+          dogumTarihi.difference(DateTime.now()).inDays,
+          oankiMusteri.isim + " " + oankiMusteri.soyisim));
+    }
+  }
 }
 
 List<Musteri> listeleme(List<Musteri> liste) {
@@ -579,38 +611,11 @@ List<Musteri> listeleme(List<Musteri> liste) {
     liste[i].sira = i;
   }
   Musteri aktarma;
-  List<Musteri> listeYeni = liste;
   for (int i = 0; i < liste.length; i++) {
     int minId = i;
     for (int j = 0; j < liste.length; j++) {
       if (liste[minId].kontratBitisTarihi.difference(DateTime.now()).inDays <
           liste[j].kontratBitisTarihi.difference(DateTime.now()).inDays) {
-        minId = j;
-        aktarma = liste[j];
-        liste[j] = liste[i];
-        liste[i] = aktarma;
-      }
-    }
-  }
-  for (int i = 0; i < liste.length; i++) {
-    int minId = i;
-    for (int j = 0; j < liste.length; j++) {
-      if (liste[minId].kontratBitisTarihi.difference(DateTime.now()).inDays >
-          liste[j].kontratBitisTarihi.difference(DateTime.now()).inDays) {
-        minId = j;
-        aktarma = liste[j];
-        liste[j] = liste[i];
-        liste[i] = aktarma;
-      }
-    }
-  }
-
-  for (int i = 0; i < liste.length; i++) {
-    int minId = i;
-    for (int j = 0; j < liste.length; j++) {
-      if (((liste[j].isim).toLowerCase())
-              .compareTo(((liste[minId].isim).toLowerCase())) >
-          0) {
         minId = j;
         aktarma = liste[j];
         liste[j] = liste[i];

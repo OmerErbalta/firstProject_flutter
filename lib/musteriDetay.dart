@@ -430,7 +430,7 @@ Image resim(double e, Musteri oAnkiMusteri) {
       width: e * 0.45,
       fit: BoxFit.fitWidth,
     );
-  } else if (oAnkiMusteri.cinsiyet == "SingingCharacter.Erkek") {
+  } else if (oAnkiMusteri.cinsiyet == "Erkek") {
     return Image.asset(
       'assets/img/profile.png',
       width: e * 0.45,
@@ -446,7 +446,7 @@ Image resim(double e, Musteri oAnkiMusteri) {
 }
 
 void whatsappMesaj(Musteri e) async {
-  if (e.cinsiyet == "SingingCharacter.Erkek") {
+  if (e.cinsiyet == "Erkek") {
     await launchUrl(
         Uri.parse('whatsapp://send?phone=90${e.telefon}?&text=Merhaba ' +
             e.isim +

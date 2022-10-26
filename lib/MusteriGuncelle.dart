@@ -20,13 +20,10 @@ class musteriguncelle extends StatefulWidget {
   @override
   State<musteriguncelle> createState() => _musteriguncelleState();
 }
-
-enum SingingCharacter { Erkek, Kadin }
-
 class _musteriguncelleState extends State<musteriguncelle> {
   var box = Hive.box<Musteri>("Musteriler");
   late String cinsiyeti = widget.guncellemusteri.cinsiyet;
-  SingingCharacter? cinsiyet = SingingCharacter.values[0];
+ late String cinsiyet = widget.guncellemusteri.cinsiyet;
   late DateTime kontratBaslangicTarihi =
       widget.guncellemusteri.kontratBaslangicTarihi;
   late DateTime dogumTarihi2 = widget.guncellemusteri.dogumTarihi;
@@ -170,11 +167,11 @@ class _musteriguncelleState extends State<musteriguncelle> {
                         child: Row(
                           children: [
                             Radio(
-                                value: SingingCharacter.Erkek,
+                                value: "Erkek",
                                 groupValue: cinsiyet,
-                                onChanged: (SingingCharacter? index) {
+                                onChanged: (String? index) {
                                   setState(() {
-                                    cinsiyet = index;
+                                    cinsiyet = index!;
                                   });
                                 }),
                             Expanded(
@@ -189,11 +186,11 @@ class _musteriguncelleState extends State<musteriguncelle> {
                         child: Row(
                           children: [
                             Radio(
-                                value: SingingCharacter.Kadin,
+                                value: "Kadın",
                                 groupValue: cinsiyet,
-                                onChanged: (SingingCharacter? index) {
+                                onChanged: (String? index) {
                                   setState(() {
-                                    cinsiyet = index;
+                                    cinsiyet = index!;
                                   });
                                 }),
                             Expanded(

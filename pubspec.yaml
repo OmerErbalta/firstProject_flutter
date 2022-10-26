@@ -51,6 +51,8 @@ dependencies:
   url_launcher: ^6.1.6
   flutter_cupertino_date_picker_fork: ^1.0.7
   anim_search_bar: ^2.0.2
+  flutter_local_notifications: ^12.0.2
+  timezone: ^0.9.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
